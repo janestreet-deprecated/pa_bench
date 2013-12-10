@@ -1,0 +1,36 @@
+OASISFormat:      0.3
+OCamlVersion:     >= 4.00.0
+FindlibVersion:   >= 1.3.2
+Name:             pa_bench
+Version:          109.55.00
+Synopsis:         OCaml inline benchmarks.
+Authors:          Jane Street Capital LLC <opensource@janestreet.com>
+Copyrights:       (C) 2009-2013 Jane Street Capital LLC <opensource@janestreet.com>
+Maintainers:      Jane Street Capital LLC <opensource@janestreet.com>
+License:          Apache-2.0
+LicenseFile:      LICENSE.txt
+Homepage:         https://github.com/janestreet/pa_bench
+Plugins:          StdFiles (0.3), DevFiles (0.3), META (0.3)
+XStdFilesAUTHORS: false
+XStdFilesREADME:  false
+BuildTools:       ocamlbuild, camlp4o
+
+Library pa_bench_lib
+  Path:               lib
+  FindlibName:        pa_bench
+  Pack:               true
+  Modules:            Benchmark_accumulator
+  XMETADescription:   Runtime support for pa_bench
+
+Library pa_bench_syntax
+  Path:               syntax
+  Modules:            Pa_bench
+  FindlibName:        syntax
+  FindlibParent:      pa_bench_lib
+  BuildDepends:       camlp4.lib,
+                      camlp4.quotations,
+                      pa_ounit.syntax,
+                      type_conv
+  XMETAType:          syntax
+  XMETARequires:      camlp4, pa_ounit
+  XMETADescription:   Syntax extension writing inline benchmarks

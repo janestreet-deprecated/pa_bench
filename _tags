@@ -1,0 +1,3 @@
+# OASIS_START
+# OASIS_STOP
+<syntax/pa_bench.ml>: syntax_camlp4o,pkg_camlp4.extend
