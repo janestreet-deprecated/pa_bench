@@ -1,0 +1,19 @@
+# OASIS_START
+# DO NOT EDIT (digest: eb2198a8367a3004834dddec85098b88)
+version = "109.55.00"
+description = "Runtime support for pa_bench"
+archive(byte) = "pa_bench_lib.cma"
+archive(byte, plugin) = "pa_bench_lib.cma"
+archive(native) = "pa_bench_lib.cmxa"
+archive(native, plugin) = "pa_bench_lib.cmxs"
+exists_if = "pa_bench_lib.cma"
+package "syntax" (
+ version = "109.55.00"
+ description = "Syntax extension writing inline benchmarks"
+ requires = "camlp4 pa_ounit"
+ archive(syntax, preprocessor) = "pa_bench_syntax.cma"
+ archive(syntax, toploop) = "pa_bench_syntax.cma"
+ exists_if = "pa_bench_syntax.cma"
+)
+# OASIS_STOP
+
