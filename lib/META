@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: b63a31be26c19f8db7525495e1357e21)
-version = "109.55.01"
+# DO NOT EDIT (digest: 975fd45bd5c23114b9aca4a9f654ac14)
+version = "109.55.02"
 description = "Runtime support for pa_bench"
 archive(byte) = "pa_bench_lib.cma"
 archive(byte, plugin) = "pa_bench_lib.cma"
@@ -8,9 +8,9 @@ archive(native) = "pa_bench_lib.cmxa"
 archive(native, plugin) = "pa_bench_lib.cmxs"
 exists_if = "pa_bench_lib.cma"
 package "syntax" (
- version = "109.55.01"
+ version = "109.55.02"
  description = "Syntax extension writing inline benchmarks"
- requires = "camlp4 pa_ounit"
+ requires = "camlp4 pa_ounit pa_ounit.syntax"
  archive(syntax, preprocessor) = "pa_bench_syntax.cma"
  archive(syntax, toploop) = "pa_bench_syntax.cma"
  archive(syntax, byte) = "pa_bench_syntax.cma"
