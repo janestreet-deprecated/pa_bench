@@ -27,7 +27,8 @@ Library pa_bench_syntax
   Modules:            Pa_bench
   FindlibName:        syntax
   FindlibParent:      pa_bench_lib
-  BuildDepends:       camlp4.lib,
+  BuildDepends:       camlp4.extend,
+                      camlp4.lib,
                       camlp4.quotations,
                       pa_ounit.syntax,
                       type_conv
