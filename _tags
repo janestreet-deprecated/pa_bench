@@ -1,7 +1,7 @@
 # OASIS_START
-# DO NOT EDIT (digest: 107779c9dde751b3278a5650d0722194)
-# Ignore VCS directories, you can use the same kind of rule outside 
-# OASIS_START/STOP if you want to exclude directories that contains 
+# DO NOT EDIT (digest: 86fc2f3e4950963d0ef07fad397e7eda)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
 <**/.svn>: -traverse
 <**/.svn>: not_hygienic
@@ -18,9 +18,9 @@
 "lib/benchmark_accumulator.cmx": for-pack(Pa_bench_lib)
 # Library pa_bench_syntax
 "syntax/pa_bench_syntax.cmxs": use_pa_bench_syntax
-<syntax/*.ml{,i}>: pkg_camlp4.lib
-<syntax/*.ml{,i}>: pkg_camlp4.quotations
-<syntax/*.ml{,i}>: pkg_pa_ounit.syntax
-<syntax/*.ml{,i}>: pkg_type_conv
+<syntax/*.ml{,i}>: package(camlp4.lib)
+<syntax/*.ml{,i}>: package(camlp4.quotations)
+<syntax/*.ml{,i}>: package(pa_ounit.syntax)
+<syntax/*.ml{,i}>: package(type_conv)
 # OASIS_STOP
 <syntax/pa_bench.ml>: syntax_camlp4o,pkg_camlp4.extend

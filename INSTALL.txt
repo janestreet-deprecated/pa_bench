@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 4126f937cd4b5443acf7e03b6b217db3) *)
+(* DO NOT EDIT (digest: 18f2c6d8ddd8fc396af1ef64507c10ef) *)
 This is the INSTALL file for the pa_bench distribution.
 
 This package uses OASIS to generate its build system. See section OASIS for
@@ -25,7 +25,7 @@ Installing
 Uninstalling
 ============
 
-1. Go to the root of the package 
+1. Go to the root of the package
 2. Run 'ocaml setup.ml -uninstall'
 
 OASIS
