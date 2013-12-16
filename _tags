@@ -23,4 +23,4 @@
 <syntax/*.ml{,i}>: package(pa_ounit.syntax)
 <syntax/*.ml{,i}>: package(type_conv)
 # OASIS_STOP
-<syntax/pa_bench.ml>: syntax_camlp4o,pkg_camlp4.extend
+<syntax/pa_bench.ml>: syntax_camlp4o
