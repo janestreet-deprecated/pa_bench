@@ -2,6 +2,10 @@ open Camlp4.PreCast
 
 let libname () = Pa_ounit.libname ()
 
+let drop_benches = ref false
+let () =
+  Camlp4.Options.add "-pa-bench-drop" (Arg.Set drop_benches) "Drop inline benchmarks"
+
 let descr _loc =
   let filename = Loc.file_name  _loc in
   let line     = Loc.start_line _loc in
@@ -13,24 +17,28 @@ let descr _loc =
   <:expr< $`int:end_pos$ >>
 
 let apply_to_descr_bench lid _loc e_opt name more_arg =
-   Pa_type_conv.set_conv_path_if_not_set _loc;
-   let filename, line, start_pos, end_pos = descr _loc in
-   let descr = match e_opt with
-     | None -> <:expr< "" >>
-     | Some e -> <:expr< $str:Pa_ounit.string_of_expr e$ >>
-   in
-   let name = <:expr< $str:name$ >> in
-   let type_conv_path = <:expr< $str:Pa_type_conv.get_conv_path ()$ >> in
-   <:str_item<
-     value () =
-       if Pa_bench_lib.Benchmark_accumulator.add_benchmarks_flag
-       then Pa_bench_lib.Benchmark_accumulator.$lid:lid$ ~name:$name$
-         ~code:$descr$ ~type_conv_path:$type_conv_path$
-         ~filename:$filename$ ~line:$line$ ~startpos:$start_pos$ ~endpos:$end_pos$
-         $more_arg$
-       else
-         ()
+  if !drop_benches then
+    <:str_item< >>
+  else begin
+    Pa_type_conv.set_conv_path_if_not_set _loc;
+    let filename, line, start_pos, end_pos = descr _loc in
+    let descr = match e_opt with
+      | None -> <:expr< "" >>
+      | Some e -> <:expr< $str:Pa_ounit.string_of_expr e$ >>
+    in
+    let name = <:expr< $str:name$ >> in
+    let type_conv_path = <:expr< $str:Pa_type_conv.get_conv_path ()$ >> in
+    <:str_item<
+      value () =
+        if Pa_bench_lib.Benchmark_accumulator.add_benchmarks_flag
+        then Pa_bench_lib.Benchmark_accumulator.$lid:lid$ ~name:$name$
+          ~code:$descr$ ~type_conv_path:$type_conv_path$
+          ~filename:$filename$ ~line:$line$ ~startpos:$start_pos$ ~endpos:$end_pos$
+          $more_arg$
+        else
+          ()
     >>
+  end
 
 EXTEND Gram
   GLOBAL: Syntax.str_item;
@@ -71,9 +79,12 @@ let () =
   let current_str_parser, _ = Camlp4.Register.current_parser () in
   Camlp4.Register.register_str_item_parser (fun ?directive_handler _loc stream ->
     let ml = current_str_parser ?directive_handler _loc stream in
-    <:str_item<
-      value () = Pa_bench_lib.Benchmark_accumulator.Current_libname.set $str:libname ()$;
-      $ml$;
-      value () = Pa_bench_lib.Benchmark_accumulator.Current_libname.unset ();
-    >>
+    if !drop_benches then
+      ml
+    else
+      <:str_item<
+        value () = Pa_bench_lib.Benchmark_accumulator.Current_libname.set $str:libname ()$;
+        $ml$;
+        value () = Pa_bench_lib.Benchmark_accumulator.Current_libname.unset ();
+      >>
   )
