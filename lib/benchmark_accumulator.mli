@@ -15,15 +15,15 @@ module Current_libname : sig
 end
 
 module Entry : sig
-  type indexed_spec = {
+  type 'a indexed_spec = {
     arg_name   : string;
     arg_values : int list;
-    thunk      : int -> unit -> unit;
+    thunk      : int -> unit -> 'a;
   }
 
   type test_spec =
-    | Regular_thunk of (unit -> unit -> unit)
-    | Indexed_thunk of indexed_spec
+    | Regular_thunk : (unit -> unit -> 'a) -> test_spec
+    | Indexed_thunk : 'a indexed_spec -> test_spec
 
   type t = private {
     unique_id         : int;

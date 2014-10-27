@@ -30,15 +30,15 @@ end
    along with some metadata about is position, arguments etc. *)
 module Entry = struct
 
-  type indexed_spec = {
+  type 'a indexed_spec = {
     arg_name   : string;
     arg_values : int list;
-    thunk      : int -> unit -> unit;
+    thunk      : int -> unit -> 'a;
   }
 
   type test_spec =
-    | Regular_thunk of (unit -> unit -> unit)
-    | Indexed_thunk of indexed_spec
+    | Regular_thunk : (unit -> unit -> 'a) -> test_spec
+    | Indexed_thunk : 'a indexed_spec -> test_spec
 
   type t = {
     unique_id         : int;

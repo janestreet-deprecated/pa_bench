@@ -45,15 +45,20 @@ EXTEND Gram
   Syntax.str_item:
     [[
       "BENCH"; name = Syntax.a_STRING; "=" ; e = Syntax.expr ->
-      (* The ignore below allows us to write tests very succinctly. The type checker still
-         complains when exp has an arrow type and this prevents errors caused by partial
-         application. *)
+      (* Here and in the other cases below, because functions given to pa_bench can return
+         any 'a, we add a dead call to ignore so we can get a warning if the user code
+         mistakenly gives a partial application. *)
       apply_to_descr_bench "add_bench" _loc (Some e) name
-        <:expr< Pa_bench_lib.Benchmark_accumulator.Entry.Regular_thunk
-               (fun () () -> Pervasives.ignore $e$) >>
+        <:expr< let f () = fun () -> $e$ in begin
+                  if False then Pervasives.ignore (f () ()) else ();
+                  Pa_bench_lib.Benchmark_accumulator.Entry.Regular_thunk f
+                end >>
     | "BENCH_FUN"; name = Syntax.a_STRING; "=" ; e = Syntax.expr ->
       apply_to_descr_bench "add_bench" _loc (Some e) name
-        <:expr< Pa_bench_lib.Benchmark_accumulator.Entry.Regular_thunk (fun () -> $e$) >>
+        <:expr< let f () = $e$ in begin
+                  if False then Pervasives.ignore (f () ()) else ();
+                  Pa_bench_lib.Benchmark_accumulator.Entry.Regular_thunk f
+                end >>
     | "BENCH_INDEXED"; name = Syntax.a_STRING;
                        var_name = Syntax.a_LIDENT;
       (* precedence level '^' is slightly higher than '=', i.e. it is higher than '=' but
@@ -63,12 +68,14 @@ EXTEND Gram
                        "=";
                        e = Syntax.expr ->
       apply_to_descr_bench "add_bench" _loc (Some e) name
-        <:expr<
-          Pa_bench_lib.Benchmark_accumulator.Entry.Indexed_thunk {
-            Pa_bench_lib.Benchmark_accumulator.Entry.arg_name = $str:var_name$;
-            Pa_bench_lib.Benchmark_accumulator.Entry.arg_values = $args$;
-            Pa_bench_lib.Benchmark_accumulator.Entry.thunk = fun $lid:var_name$ -> $e$ }
-        >>
+        <:expr< let arg_values = $args$
+                and f = fun $lid:var_name$ -> $e$ in begin
+                  if False then Pervasives.ignore (f 0 ()) else ();
+                  Pa_bench_lib.Benchmark_accumulator.Entry.Indexed_thunk {
+                    Pa_bench_lib.Benchmark_accumulator.Entry.arg_name = $str:var_name$;
+                    Pa_bench_lib.Benchmark_accumulator.Entry.arg_values;
+                    Pa_bench_lib.Benchmark_accumulator.Entry.thunk = f }
+                end >>
     | "BENCH_MODULE"; name = Syntax.a_STRING; "=" ; expr = Syntax.module_expr ->
       apply_to_descr_bench "add_bench_module" _loc None name
         <:expr< (fun () -> let module M = $expr$ in () ) >>
