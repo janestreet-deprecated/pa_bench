@@ -33,5 +33,5 @@ Library pa_bench_syntax
                       pa_ounit.syntax,
                       type_conv
   XMETAType:          syntax
-  XMETARequires:      camlp4, pa_ounit, pa_ounit.syntax
+  XMETARequires:      camlp4, type_conv, pa_ounit, pa_ounit.syntax
   XMETADescription:   Syntax extension writing inline benchmarks
