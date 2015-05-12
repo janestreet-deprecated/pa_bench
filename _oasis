@@ -5,7 +5,7 @@ Name:             pa_bench
 Version:          112.06.00
 Synopsis:         OCaml inline benchmarks.
 Authors:          Jane Street Group, LLC <opensource@janestreet.com>
-Copyrights:       (C) 2009-2013 Jane Street Group, LLC <opensource@janestreet.com>
+Copyrights:       (C) 2009-2013 Jane Street Group LLC <opensource@janestreet.com>
 Maintainers:      Jane Street Group, LLC <opensource@janestreet.com>
 License:          Apache-2.0
 LicenseFile:      LICENSE.txt
