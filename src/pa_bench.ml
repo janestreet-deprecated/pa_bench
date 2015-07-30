@@ -2,9 +2,20 @@ open Camlp4.PreCast
 
 let libname () = Pa_ounit.libname ()
 
-let drop_benches = ref false
+let drop_benches : [`No | `Deadcode | `Remove ] ref = ref `No
 let () =
-  Camlp4.Options.add "-pa-bench-drop" (Arg.Set drop_benches) "Drop inline benchmarks"
+  Camlp4.Options.add "-pa-bench-drop" (Arg.Unit (fun () -> drop_benches := `Remove))
+    "Drop inline benchmarks";
+  Camlp4.Options.add "-pa-bench-drop-with-deadcode"
+    (Arg.Unit (fun () -> drop_benches := `Deadcode))
+    "Drop inline benchmarks by wrapping them inside deadcode to prevent unused variable \
+     warnings."
+
+let maybe_drop _loc expr =
+  match !drop_benches with
+  | `No       -> <:str_item< value () = $expr$; >>
+  | `Deadcode -> <:str_item< value () = if False then $expr$ else (); >>
+  | `Remove   -> <:str_item< >>
 
 let descr _loc =
   let filename = Loc.file_name  _loc in
@@ -17,28 +28,24 @@ let descr _loc =
   <:expr< $`int:end_pos$ >>
 
 let apply_to_descr_bench lid _loc e_opt name more_arg =
-  if !drop_benches then
-    <:str_item< >>
-  else begin
-    Pa_type_conv.set_conv_path_if_not_set _loc;
-    let filename, line, start_pos, end_pos = descr _loc in
-    let descr = match e_opt with
-      | None -> <:expr< "" >>
-      | Some e -> <:expr< $str:Pa_ounit.string_of_expr e$ >>
-    in
-    let name = <:expr< $str:name$ >> in
-    let type_conv_path = <:expr< $str:Pa_type_conv.get_conv_path ()$ >> in
-    <:str_item<
-      value () =
-        if Pa_bench_lib.Benchmark_accumulator.add_benchmarks_flag
-        then Pa_bench_lib.Benchmark_accumulator.$lid:lid$ ~name:$name$
-          ~code:$descr$ ~type_conv_path:$type_conv_path$
-          ~filename:$filename$ ~line:$line$ ~startpos:$start_pos$ ~endpos:$end_pos$
-          $more_arg$
-        else
-          ()
+  Pa_type_conv.set_conv_path_if_not_set _loc;
+  let filename, line, start_pos, end_pos = descr _loc in
+  let descr = match e_opt with
+    | None -> <:expr< "" >>
+    | Some e -> <:expr< $str:Pa_ounit.string_of_expr e$ >>
+  in
+  let name = <:expr< $str:name$ >> in
+  let type_conv_path = <:expr< $str:Pa_type_conv.get_conv_path ()$ >> in
+  maybe_drop _loc
+    <:expr<
+      if Pa_bench_lib.Benchmark_accumulator.add_benchmarks_flag
+      then Pa_bench_lib.Benchmark_accumulator.$lid:lid$ ~name:$name$
+        ~code:$descr$ ~type_conv_path:$type_conv_path$
+        ~filename:$filename$ ~line:$line$ ~startpos:$start_pos$ ~endpos:$end_pos$
+        $more_arg$
+      else
+        ()
     >>
-  end
 
 EXTEND Gram
   GLOBAL: Syntax.str_item;
@@ -86,12 +93,11 @@ let () =
   let current_str_parser, _ = Camlp4.Register.current_parser () in
   Camlp4.Register.register_str_item_parser (fun ?directive_handler _loc stream ->
     let ml = current_str_parser ?directive_handler _loc stream in
-    if !drop_benches then
-      ml
-    else
-      <:str_item<
-        value () = Pa_bench_lib.Benchmark_accumulator.Current_libname.set $str:libname ()$;
-        $ml$;
-        value () = Pa_bench_lib.Benchmark_accumulator.Current_libname.unset ();
+    <:str_item<
+      $maybe_drop _loc
+        <:expr<Pa_bench_lib.Benchmark_accumulator.Current_libname.set $str:libname ()$>>$;
+      $ml$;
+      $maybe_drop _loc
+        <:expr<Pa_bench_lib.Benchmark_accumulator.Current_libname.unset ()>>$;
       >>
   )
